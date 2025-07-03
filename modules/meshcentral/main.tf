@@ -42,7 +42,7 @@ resource "aws_instance" "ec2" {
   key_name		            = var.ec2_config.key_name
   count                   = var.ec2_instance_count
   instance_type           = var.ec2_config.instance_type
-  iam_instance_profile    = var.ec2_instance_profile_override != null ? var.ec2_instance_profile_override : aws_iam_instance_profile.ec2_instance_profile.name
+  iam_instance_profile    = var.ec2_config.instance_profile_override != null ? var.ec2_config.instance_profile_override : aws_iam_instance_profile.ec2_instance_profile.name
   vpc_security_group_ids  = [aws_security_group.all-vpcs-sg[count.index].id,aws_security_group.http_access_sg[count.index].id]
   subnet_id               = random_shuffle.public_subnets.result[0]
   source_dest_check       = false

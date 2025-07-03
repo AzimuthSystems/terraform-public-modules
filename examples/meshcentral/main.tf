@@ -9,7 +9,6 @@ module "meshcentral" {
   aws_region               = var.aws_region
   environment              = var.environment
   ec2_instance_count       = var.ec2_instance_count
-  ec2_instance_profile_override = var.ec2_instance_profile_override
   ec2_config               = var.ec2_config
   ec2_additional_tags      = var.ec2_additional_tags
   letsencrypt_config       = var.letsencrypt_config

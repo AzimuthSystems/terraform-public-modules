@@ -23,8 +23,14 @@ ec2_config = {
   fqdn           = "mesh.example.com"
   description    = "MeshCentral Server"
   key_name       = "ExampleKeyPair"
-  profile        = "ExampleEC2Role"
-  instance_type  = "t4g.micro"
+  instance_profile_override   = null # default is null, which uses the default instance profile created by the module
+  instance_type               = "t4g.micro"
+  root_block_device = {
+    volume_type   = "gp3"
+    volume_size   = 20
+    volume_iops   = 3000
+    volume_throughput = 125
+  }
 }
 
 # Additional tags

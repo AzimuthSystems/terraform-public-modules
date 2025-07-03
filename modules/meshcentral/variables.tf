@@ -98,12 +98,6 @@ variable "ec2_instance_count" {
   default = 1
 }
 
-variable "ec2_instance_profile_override" {
-  description = "Optional: Name of an existing IAM instance profile to attach to the EC2 instance instead of creating one"
-  type        = string
-  default     = null
-}
-
 variable "ec2_config" {
   description = "Configuration options for the MeshCentral EC2 instance"
   type = object({
@@ -111,6 +105,7 @@ variable "ec2_config" {
     fqdn           = string
     description    = string
     key_name       = string
+    instance_profile_override   = optional(string, null) # Optional: Name of an existing IAM instance profile to attach to the EC2 instance
     instance_type  = string
     root_block_device = optional(object({
       volume_type = string
