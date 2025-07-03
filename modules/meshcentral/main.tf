@@ -12,26 +12,68 @@ provider "aws" {
 }
 
 ###  Configure EC2 details as necessary.
+resource "aws_iam_role" "ec2_role" {
+  name = "${var.ec2_config.name}-ec2-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Action = "sts:AssumeRole"
+      Effect = "Allow"
+      Principal = {
+        Service = "ec2.amazonaws.com"
+      }
+    }]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "ssm_attach" {
+  role       = aws_iam_role.ec2_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM"
+}
+
+resource "aws_iam_instance_profile" "ec2_instance_profile" {
+  name = "${var.ec2_config.name}-instance-profile"
+  role = aws_iam_role.ec2_role.name
+}
 
 resource "aws_instance" "ec2" {
   ami                     = data.aws_ami.amazon.id
   key_name		            = var.ec2_config.key_name
   count                   = var.ec2_instance_count
   instance_type           = var.ec2_config.instance_type
-  iam_instance_profile    = var.ec2_config.profile
+  iam_instance_profile    = var.ec2_instance_profile_override != null ? var.ec2_instance_profile_override : aws_iam_instance_profile.ec2_instance_profile.name
   vpc_security_group_ids  = [aws_security_group.all-vpcs-sg[count.index].id,aws_security_group.http_access_sg[count.index].id]
   subnet_id               = random_shuffle.public_subnets.result[0]
   source_dest_check       = false
+  dynamic "root_block_device" {
+    for_each = var.ec2_config.root_block_device != null ? [var.ec2_config.root_block_device] : []
+    content {
+      volume_type = root_block_device.value.volume_type
+      volume_size = root_block_device.value.volume_size
+      iops        = root_block_device.value.iops
+      throughput  = root_block_device.value.throughput
+      tags = {
+        BackupSchedule = "Daily"
+        Description    = "MeshCentral Root Volume"
+        SystemsManager = "Enabled"
+        Name           = "meshcentral /dev/sda1"
+      }
+    }
+  }
+
+  # Fallback default if not set
   root_block_device {
+    count       = var.ec2_config.root_block_device == null ? 1 : 0
     volume_type = "gp3"
     volume_size = 20
-    iops = 3000
-    throughput = 125
+    iops        = 3000
+    throughput  = 125
     tags = {
       BackupSchedule = "Daily"
-      Description    = "MeshCentral Remote Control Server"
+      Description    = "MeshCentral Root Volume"
       SystemsManager = "Enabled"
-      Name = "meshcentral /dev/sda1 (1/1)"
+      Name           = "meshcentral /dev/sda1"
     }
   }
   lifecycle {

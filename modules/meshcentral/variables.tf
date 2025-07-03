@@ -98,17 +98,35 @@ variable "ec2_instance_count" {
   default = 1
 }
 
+variable "ec2_instance_profile_override" {
+  description = "Optional: Name of an existing IAM instance profile to attach to the EC2 instance instead of creating one"
+  type        = string
+  default     = null
+}
+
 variable "ec2_config" {
-    type = map(string)
-    default = {
-        name = "meshtest.domainname.net"  #Name is often used in AD for windows.  Restrict to AD naming conventions if binding.
-        fqdn = "meshtest.domainname.net"  #In case the name var does not align with DNS.  
-        description = "MeshCentral Server"
-        key_name = "AWSKeyPairName"  # Replace with your EC2 Key Pair name
-        profile = "EC2-SSM-Role"
-        instance_type = "t4g.micro"
-        #ec2_name_scrubbed = "mesh-server"   ###  Scrubbed is used for things that can't have .'s
-    }
+  description = "Configuration options for the MeshCentral EC2 instance"
+  type = object({
+    name           = string
+    fqdn           = string
+    description    = string
+    key_name       = string
+    instance_type  = string
+    root_block_device = optional(object({
+      volume_type = string
+      volume_size = number
+      iops        = number
+      throughput  = number
+    }), null)
+  })
+  default = {
+    name           = "meshtest.domainname.net"
+    fqdn           = "meshtest.domainname.net"
+    description    = "MeshCentral Server"
+    key_name       = "AWSKeyPairName"
+    instance_type  = "t4g.micro"
+    root_block_device = null
+  }
 }
 
 variable "ec2_device_names" {
