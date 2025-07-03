@@ -25,6 +25,7 @@ ec2_config = {
   key_name       = "ExampleKeyPair"
   instance_profile_override   = null # default is null, which uses the default instance profile created by the module
   instance_type               = "t4g.micro"
+  swap_size     = 2
   root_block_device = {
     volume_type   = "gp3"
     volume_size   = 20

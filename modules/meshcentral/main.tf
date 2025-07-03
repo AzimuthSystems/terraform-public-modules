@@ -82,7 +82,7 @@ resource "aws_instance" "ec2" {
     ADMIN_PASSWORD          = "${var.mesh_config.admin_pass}",
     ADMIN_EMAIL             = "${var.mesh_config.admin_email}",
     MESHCONFIG_SSM_PATH     = aws_ssm_parameter.meshcentral_config.name,
-    SWAP_SIZE               = 2, # Size in GB
+    SWAP_SIZE               = var.ec2_config.swap, # Size in GB
     cognito_auth            = var.cognito_config.cognito_auth,
     cognito_admin_oidc      = var.cognito_config.cognito_admin_oidc,
     cognito_admin_full_name = var.cognito_config.cognito_admin_full_name,
@@ -139,7 +139,7 @@ locals {
 resource "aws_ssm_parameter" "meshcentral_config" {
   name        = "/meshcentral/${var.ec2_config.name}/config.json"
   description = "MeshCentral ${var.ec2_config.name} configuration JSON"
-  type        = "String"
+  type        = "SecureString"
   overwrite   = true
   value       = local.meshcentral_config_rendered
 }

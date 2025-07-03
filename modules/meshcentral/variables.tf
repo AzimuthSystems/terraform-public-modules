@@ -107,6 +107,7 @@ variable "ec2_config" {
     key_name       = string
     instance_profile_override   = optional(string, null) # Optional: Name of an existing IAM instance profile to attach to the EC2 instance
     instance_type  = string
+    swap_size     = optional(number, 2) # Optional: Size of the swap file in GB 
     root_block_device = optional(object({
       volume_type = string
       volume_size = number
@@ -120,6 +121,7 @@ variable "ec2_config" {
     description    = "MeshCentral Server"
     key_name       = "AWSKeyPairName"
     instance_type  = "t4g.micro"
+    swap_size      = 2 # Optional: Size of the swap file in GB
     root_block_device = null
   }
 }
