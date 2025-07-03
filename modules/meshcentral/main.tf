@@ -39,7 +39,7 @@ resource "aws_instance" "ec2" {
   }
 
   ### Retrieve launch customizations ###
-  user_data = templatefile("cloud_init.tftpl", {
+  user_data = templatefile("${path.module}/cloud_init.tftpl", {
     HOST_NAME               = "${var.ec2_config.fqdn}",
     ADMIN_USER              = "${var.mesh_config.admin_user}",
     ADMIN_PASSWORD          = "${var.mesh_config.admin_pass}",
@@ -73,7 +73,7 @@ resource "aws_eip" "eip" {
 
 # If Cognito is enabled, use the Cognito template, otherwise use the basic template
 locals {
-  meshcentral_config_template = var.cognito_config.cognito_auth ? "cognito_mesh_config.json.tftpl" : "basic_mesh_config.json.tftpl"
+  meshcentral_config_template = var.cognito_config.cognito_auth ? "${path.module}/cognito_mesh_config.json.tftpl" : "${path.module}/basic_mesh_config.json.tftpl"
 }
 
 locals {
