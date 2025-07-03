@@ -58,7 +58,7 @@ This Terraform configuration provisions a **MeshCentral Remote Management Server
 
 ---
 
-## Usage Example
+## Usage Example - Example configs can be found here -> [examples/meshcentral](https://github.com/AzimuthSystems/terraform-public-modules/tree/main/examples/meshcentral)
 
 ```hcl
 module "meshcentral" {
