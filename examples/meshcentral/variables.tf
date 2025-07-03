@@ -6,6 +6,7 @@ variable "r53_config" {}
 variable "aws_region" {}
 variable "environment" {}
 variable "ec2_instance_count" {}
+variable "ec2_instance_profile_override" {}
 variable "ec2_config" {}
 variable "ec2_additional_tags" {}
 variable "letsencrypt_config" {}

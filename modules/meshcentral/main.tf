@@ -47,33 +47,28 @@ resource "aws_instance" "ec2" {
   subnet_id               = random_shuffle.public_subnets.result[0]
   source_dest_check       = false
   dynamic "root_block_device" {
-    for_each = var.ec2_config.root_block_device != null ? [var.ec2_config.root_block_device] : []
-    content {
-      volume_type = root_block_device.value.volume_type
-      volume_size = root_block_device.value.volume_size
-      iops        = root_block_device.value.iops
-      throughput  = root_block_device.value.throughput
-      tags = {
-        BackupSchedule = "Daily"
-        Description    = "MeshCentral Root Volume"
-        SystemsManager = "Enabled"
-        Name           = "meshcentral /dev/sda1"
-      }
-    }
-  }
+    for_each = [(
+      var.ec2_config.root_block_device != null
+      ? var.ec2_config.root_block_device
+      : {
+          volume_type = "gp3"
+          volume_size = 20
+          iops        = 3000
+          throughput  = 125
+        }
+    )]
 
-  # Fallback default if not set
-  root_block_device {
-    count       = var.ec2_config.root_block_device == null ? 1 : 0
-    volume_type = "gp3"
-    volume_size = 20
-    iops        = 3000
-    throughput  = 125
+  content {
+    volume_type = root_block_device.value.volume_type
+    volume_size = root_block_device.value.volume_size
+    iops        = root_block_device.value.iops
+    throughput  = root_block_device.value.throughput
     tags = {
       BackupSchedule = "Daily"
       Description    = "MeshCentral Root Volume"
       SystemsManager = "Enabled"
       Name           = "meshcentral /dev/sda1"
+      }
     }
   }
   lifecycle {
