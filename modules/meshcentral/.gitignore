@@ -1,0 +1,38 @@
+# Terraform
+*.tfstate
+*.tfstate.*
+*.tfvars
+.terraform/
+.terraform.lock.hcl
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Thumbnails
+._*
+
+# VS Code
+.vscode/
+
+# Vim swap files
+*.swp
+
+# Emacs backup files
+*~
+
+# System Files
+Icon?
+ehthumbs.db
+Thumbs.db
+
+# Other hidden files
+.env
