@@ -61,8 +61,8 @@ resource "aws_instance" "ec2" {
   content {
     volume_type = root_block_device.value.volume_type
     volume_size = root_block_device.value.volume_size
-    iops        = root_block_device.value.iops
-    throughput  = root_block_device.value.throughput
+    iops        = root_block_device.value.volume_iops
+    throughput  = root_block_device.value.volume_throughput
     tags = {
       BackupSchedule = "Daily"
       Description    = "MeshCentral Root Volume"

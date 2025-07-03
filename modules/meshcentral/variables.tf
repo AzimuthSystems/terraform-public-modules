@@ -110,8 +110,8 @@ variable "ec2_config" {
     root_block_device = optional(object({
       volume_type = string
       volume_size = number
-      iops        = number
-      throughput  = number
+      volume_iops        = number
+      volume_throughput  = number
     }), null)
   })
   default = {
