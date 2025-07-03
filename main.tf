@@ -1,5 +1,5 @@
 module "meshcentral" {
-  source = "./modules/mesh_central_tf"
+  source = "./modules/meshcentral"
 
   vpc_account_tag          = var.vpc_account_tag
   vpc_uniqueid_tag         = var.vpc_uniqueid_tag
@@ -15,3 +15,4 @@ module "meshcentral" {
   cognito_config           = var.cognito_config
   mesh_config              = var.mesh_config
 }
+
