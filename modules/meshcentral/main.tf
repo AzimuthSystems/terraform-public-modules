@@ -78,6 +78,7 @@ resource "aws_instance" "ec2" {
   ### Retrieve launch customizations ###
   user_data = templatefile("${path.module}/cloud_init.tftpl", {
     HOST_NAME               = "${var.ec2_config.fqdn}",
+    TIMEZONE                = "${var.ec2_config.timezone}",
     ADMIN_USER              = "${var.mesh_config.admin_user}",
     ADMIN_PASSWORD          = "${var.mesh_config.admin_pass}",
     ADMIN_EMAIL             = "${var.mesh_config.admin_email}",

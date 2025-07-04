@@ -3,18 +3,17 @@
   "settings": {
     "cert": "${fqdn}",
     "WANonly": true,
-    "webRTC": true,
+    "webRTC": false,
     "port": 443,
     "aliasPort": 443,
     "redirPort": 80,
-    "redirAliasPort": 80,
-    "forceHttps": true
+    "redirAliasPort": 80
   },
   "domains": {
     "": {
       "title": "${mesh_login_title}",
       "usernameField": "email",
-      "newAccounts": true,
+      "newAccounts": false,
       "userNameIsEmail": true
       }
   },

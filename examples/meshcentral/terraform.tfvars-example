@@ -22,6 +22,7 @@ ec2_config = {
   name           = "mesh.example.com"
   fqdn           = "mesh.example.com"
   description    = "MeshCentral Server"
+  timezone       = "America/Phoenix"
   key_name       = "ExampleKeyPair"
   instance_profile_override   = null # default is null, which uses the default instance profile created by the module
   instance_type               = "t4g.micro"

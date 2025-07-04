@@ -19,7 +19,7 @@ setenforce 0
 sed -i -e 's!^SELINUX=.*!SELINUX=disabled!' /etc/selinux/config
 
 # Set timezone
-timedatectl set-timezone America/Phoenix
+timedatectl set-timezone ${TIMEZONE}
 
 ### Add Swap so this thing doesn't die horribly - Choose the one that is appropriate
 # Create 2GB Swap

@@ -104,6 +104,7 @@ variable "ec2_config" {
     name           = string
     fqdn           = string
     description    = string
+    timezone       = optional(string, "America/Los_Angeles") # Optional: Timezone for the instance, default is set to America/Los_Angeles
     key_name       = string
     instance_profile_override   = optional(string, null) # Optional: Name of an existing IAM instance profile to attach to the EC2 instance
     instance_type  = string
@@ -119,6 +120,7 @@ variable "ec2_config" {
     name           = "meshtest.domainname.net"
     fqdn           = "meshtest.domainname.net"
     description    = "MeshCentral Server"
+    timezone       = "America/Phoenix" # Optional: Timezone for the instance, default is set to America/Phoenix
     key_name       = "AWSKeyPairName"
     instance_type  = "t4g.micro"
     swap_size      = 2 # Optional: Size of the swap file in GB
