@@ -1,0 +1,26 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Ylianst/MeshCentral/master/meshcentral-config-schema.json",
+  "settings": {
+    "cert": "${fqdn}",
+    "WANonly": true,
+    "webRTC": false,
+    "port": 443,
+    "aliasPort": 443,
+    "redirPort": 80,
+    "redirAliasPort": 80
+  },
+  "domains": {
+    "": {
+      "title": "${mesh_login_title}",
+      "usernameField": "email",
+      "newAccounts": false,
+      "userNameIsEmail": true
+      }
+  },
+  "letsencrypt": {
+    "email": "${letsencrypt_email}",
+    "names": "${space_separated_domains}",
+    "skipChallengeVerification": true,
+    "production": ${letsencrypt_env}
+  }
+}

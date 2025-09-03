@@ -1,0 +1,165 @@
+#!/bin/bash
+# /var/lib/cloud/instances for userdata scripts compiled
+
+### Start Logging
+exec 3>&1 4>&2
+trap 'exec 2>&4 1>&3' 0 1 2 3
+exec 1>CloudInit.log 2>&1
+
+# Ensure SSM Agent is installed
+dnf install -y amazon-ssm-agent
+systemctl enable --now amazon-ssm-agent
+
+### Linux Defaults
+sudo hostnamectl set-hostname ${HOST_NAME}
+echo "$(hostname -I | awk '{print $1}') $(hostname) $(hostname -s)" >> /etc/hosts
+
+# Disable SELinux
+setenforce 0
+sed -i -e 's!^SELINUX=.*!SELINUX=disabled!' /etc/selinux/config
+
+# Set timezone
+timedatectl set-timezone ${TIMEZONE}
+
+### Add Swap so this thing doesn't die horribly - Choose the one that is appropriate
+# Create 2GB Swap
+fallocate -l ${SWAP_SIZE}G /swapfile
+chmod 600 /swapfile
+mkswap /swapfile
+swapon /swapfile
+echo '/swapfile none swap sw 0 0' >> /etc/fstab
+sysctl vm.swappiness=10
+echo 'vm.swappiness=10' >> /etc/sysctl.conf
+sysctl vm.vfs_cache_pressure=50
+echo 'vm.vfs_cache_pressure=50' >> /etc/sysctl.conf
+
+# Update all packages
+dnf update -y
+
+# Install utilities
+dnf install -y unzip wget curl git
+
+sudo yum install nvme-cli nzip -y
+curl "https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip" -o "/tmp/awscliv2.zip"
+unzip -q /tmp/awscliv2.zip -d /tmp
+sudo /tmp/aws/install
+
+### Need to sync time so that aws s3 works correctly.
+systemctl restart chronyd
+
+
+## Install Node.js 20 (Amazon-provided module)
+dnf install -y nodejs20
+#dnf install -y nodejs20-npm
+
+# Verify Node version
+node -v
+
+# Create MeshCentral directory
+mkdir -p /opt/meshcentral
+cd /opt/meshcentral
+
+# Install MeshCentral
+npm install meshcentral
+
+# Create default config.json
+mkdir -p /opt/meshcentral/meshcentral-data
+#cp /opt/meshcentral/node_modules/meshcentral/sample-config.json /opt/meshcentral/meshcentral-data/config.json
+
+aws ssm get-parameter --name "${MESHCONFIG_SSM_PATH}" --with-decryption --query "Parameter.Value" --output text > /opt/meshcentral/meshcentral-data/config.json
+chown root:root /opt/meshcentral/meshcentral-data/config.json
+chmod 600 /opt/meshcentral/meshcentral-data/config.json
+
+# Generate short server commands
+echo "systemctl start meshcentral.service" > start
+chmod 755 start
+echo "systemctl stop meshcentral.service" > stop
+chmod 755 stop
+echo "systemctl restart meshcentral.service" > restart
+chmod 755 restart
+echo -e "systemctl stop meshcentral.service\nnpm install meshcentral\nsystemctl start meshcentral.service\n" > update
+chmod 755 update
+
+# Create systemd service
+cat <<EOF >/etc/systemd/system/meshcentral.service
+[Unit]
+Description=MeshCentral Server
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/node /opt/meshcentral/node_modules/meshcentral
+WorkingDirectory=/opt/meshcentral
+Restart=always
+Environment=NODE_ENV=production
+LimitNOFILE=1000000
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# Enable and start MeshCentral
+systemctl daemon-reload
+systemctl enable --now meshcentral
+
+echo "Done. Wait two minutes and use a browser to access this server..."
+echo "https://${HOST_NAME}"
+echo "Login with ${ADMIN_USER} and the password you set in the terraform.tfvars file."
+sleep 60
+
+# Stop meshcentral service before creating accounts to ensure no conflicts
+systemctl stop meshcentral
+
+# Create initial admin user - Change the password after first login
+# Replace the username and password below with your desired admin credentials
+sleep 30
+
+node /opt/meshcentral/node_modules/meshcentral --createaccount ${ADMIN_USER} --pass ${ADMIN_PASSWORD} --email ${ADMIN_EMAIL}
+node /opt/meshcentral/node_modules/meshcentral --adminaccount ${ADMIN_USER}
+
+%{ if cognito_auth }
+
+# Script to inject OIDC siteadmin user
+cat <<'EOF' >/opt/meshcentral/inject_oidc_admin.sh
+#!/usr/bin/env bash
+set -e
+
+MESH_DB="/opt/meshcentral/meshcentral-data/meshcentral.db"
+OIDC_SUB="$1"
+USERNAME="$2"
+EMAIL="$3"
+
+if [ -z "$OIDC_SUB" ] || [ -z "$USERNAME" ] || [ -z "$EMAIL" ]; then
+  echo "Usage: $0 <oidc-sub> <username> <email>"
+  exit 1
+fi
+
+echo "Stopping MeshCentral..."
+systemctl stop meshcentral || true
+
+echo "Backing up DB..."
+cp "$MESH_DB" "$${MESH_DB}.bak.$(date +%s)"
+
+echo "Checking if user already exists..."
+if grep -q "\"_id\":\"user//~oidc:$OIDC_SUB\"" "$MESH_DB"; then
+  echo "User already exists. Skipping injection."
+else
+  echo "Injecting new siteadmin user..."
+  cat <<EOL >>"$MESH_DB"
+{"type":"user","_id":"user//~oidc:$OIDC_SUB","name":"$USERNAME","email":"$EMAIL","creation":$(date +%s),"login":0,"access":0,"domain":"","emailVerified":true,"siteadmin":4294967295}
+EOL
+fi
+
+echo "Restarting MeshCentral..."
+systemctl start meshcentral
+
+echo "Done. User ~oidc:$OIDC_SUB added as siteadmin."
+EOF
+
+chmod +x /opt/meshcentral/inject_oidc_admin.sh
+
+sh /opt/meshcentral/inject_oidc_admin.sh ${cognito_admin_oidc} "${cognito_admin_full_name}" "${cognito_admin_email}"
+
+%{ endif }
+# Restart meshcentral service
+systemctl start meshcentral
