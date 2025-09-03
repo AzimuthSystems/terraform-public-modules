@@ -1,0 +1,13 @@
+variable "vpc_account_tag" {}
+variable "vpc_uniqueid_tag" {}
+variable "subnet_public_tag" {}
+variable "subnet_private_tag" {}
+variable "r53_config" {}
+variable "aws_region" {}
+variable "environment" {}
+variable "ec2_instance_count" {}
+variable "ec2_config" {}
+variable "ec2_additional_tags" {}
+variable "letsencrypt_config" {}
+variable "cognito_config" {}
+variable "mesh_config" {}
