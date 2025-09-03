@@ -1,0 +1,87 @@
+# AWS region
+aws_region = "us-west-2"
+
+# Environment
+environment = {
+  env_short = "dev"
+  env_long  = "Development"
+}
+
+# VPC Configuration
+vpc_account_tag    = "Azimuth"
+vpc_uniqueid_tag   = "12345678"
+
+subnet_private_tag = "Private"
+subnet_public_tag  = "Public"
+
+# EC2 instance count
+ec2_instance_count = 1
+
+# EC2 config
+ec2_config = {
+  name           = "mesh.example.com"
+  fqdn           = "mesh.example.com"
+  description    = "MeshCentral Server"
+  timezone       = "America/Phoenix"
+  key_name       = "ExampleKeyPair"
+  instance_profile_override   = null # default is null, which uses the default instance profile created by the module
+  instance_type               = "t4g.micro"
+  swap_size     = 2
+  root_block_device = {
+    volume_type   = "gp3"
+    volume_size   = 20
+    volume_iops   = 3000
+    volume_throughput = 125
+  }
+}
+
+# Additional tags
+ec2_additional_tags = {
+    Project = "MeshCentral"
+    Owner   = "Admin"
+}
+
+# Route53 configuration
+r53_config = {
+  zone_id = "EXAMPLE_ZONE_ID"
+  type    = "A"
+  ttl     = "60"
+}
+
+# Let's Encrypt email
+letsencrypt_config = {
+  letsencrypt_emailAddress = "admin@example.com"
+  letsencrypt_env = true  # Set to true for production, false for staging
+  certbot_domains = [
+    "mesh.example.com"
+  ]
+  site_domain = "example.com""
+}
+
+# Cognito configuration
+# Note: Ensure that the client_id, client_secret, and other sensitive information are stored securely
+# and not hard-coded in production environments. Use AWS Secrets Manager or Parameter Store.
+# The values below are placeholders and should be replaced with actual values from your Cognito setup.
+# For security, consider using environment variables or a secure vault for sensitive data.
+
+cognito_config = {
+    cognito_auth = true
+    client_id = "example-client-id"
+    client_secret = "example-client-secret"
+    issuer = "https://example-issuer"
+    logoutUrl = "https://example-logout"
+    tokenUrl = "https://example-token"
+    cognito_domain = "https://example-cognito-domain"
+    cognito_custom_domain = "https://cognito.example.com"
+    cognito_admin_oidc = "example-oidc-id"
+    cognito_admin_full_name = "Example User"
+    cognito_admin_email = "admin@example.com"
+}
+
+# Mesh Central Configs - Admin user, pass, email, login title
+mesh_config = {
+  "admin_user" = "admin"
+  "admin_pass" = "CHANGEME123!"
+  "admin_email" = "admin@example.com"
+  "mesh_login_title" = "Example MeshCentral"
+}    
